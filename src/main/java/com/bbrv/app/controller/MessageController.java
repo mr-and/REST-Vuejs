@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("message")
 public class MessageController {
-
     private final MessageRepo messageRepo;
 
     @Autowired
@@ -29,27 +28,29 @@ public class MessageController {
     }
 
     @GetMapping("{id}")
-    public Message getMessage(@PathVariable("id") Message message) {
+    @JsonView(Views.FullFields.class)
+    public Message getOne(@PathVariable("id") Message message) {
         return message;
     }
 
     @PostMapping
-    public Message addMessage(@RequestBody Message message) {
+    public Message create(@RequestBody Message message) {
         message.setCreationDate(LocalDateTime.now());
         return messageRepo.save(message);
     }
 
-    @PutMapping
-    public Message updateMessage(
+    @PutMapping("{id}")
+    public Message update(
             @PathVariable("id") Message messageFromDb,
             @RequestBody Message message
     ) {
         BeanUtils.copyProperties(message, messageFromDb, "id");
+
         return messageRepo.save(messageFromDb);
     }
 
-    @DeleteMapping
-    public void deleteMessage(@PathVariable("id") Message message) {
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable("id") Message message) {
         messageRepo.delete(message);
     }
 }
