@@ -21,7 +21,7 @@ public class Message {
 
     @Column(name = "text")
     @NotBlank
-    @Size(min = 1, max = 100)
+    @Size(min = 1, max = 50)
     @JsonView(Views.IdText.class)
     private String text;
 

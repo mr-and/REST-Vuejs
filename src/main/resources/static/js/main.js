@@ -11,6 +11,7 @@ function getIndex(list, id) {
 
 var messageApi = Vue.resource('/message{/id}');
 
+
 Vue.component('message-form', {
     props: ['messages', 'messageAttr'],
     data: function() {
@@ -26,10 +27,13 @@ Vue.component('message-form', {
         }
     },
     template:
-        '<div>' +
-        '<input type="text" placeholder="Write something" v-model="text" />' +
-        '<input type="button" value="Save" @click="save" />' +
-        '</div>',
+        '<v-layout justify-center>' +
+            '<v-flex xs12 sm6>' +
+                '<v-text-field v-on:keyup.enter="save" autofocus counter="50" clearable clear-icon="mdi-close" ' +
+                'label="Новая заметка" v-model="text" />' +
+            '</v-flex>' +
+                '<v-btn color="#283593"  @click="save"> Сохранить </v-btn>' +
+        '</v-layout>',
     methods: {
         save: function() {
             var message = { text: this.text };
@@ -57,13 +61,25 @@ Vue.component('message-form', {
 
 Vue.component('message-row', {
     props: ['message', 'editMethod', 'messages'],
-    template: '<div>' +
-        '<i>({{ message.id }})</i> {{ message.text }}' +
-        '<span style="position: absolute; right: 0">' +
-        '<input type="button" value="Edit" @click="edit" />' +
-        '<input type="button" value="X" @click="del" />' +
-        '</span>' +
-        '</div>',
+    template:
+        '<v-layout align-center justify--space-around row fill-height>' +
+        '<v-flex xs12 sm5 offset-sm3>' +
+            '<v-list-tile>' +
+                '<v-list-tile>' +
+                    '<i><span class="blue-grey--text" >{{ message.id }}.&nbsp; </span></i> {{ message.text }}' +
+                '</v-list-tile >' +
+        '<v-spacer></v-spacer>' +
+                '<v-list-tile-action>' +
+                    '<v-btn @click="edit" icon><v-icon>mdi-pencil</v-icon></v-btn>' +
+                '</v-list-tile-action>' +
+                '<v-list-tile-action>' +
+                    '<v-btn  @click="del" icon><v-icon>mdi-delete</v-icon></v-btn>' +
+                '</v-list-tile-action>' +
+            '</v-list-tile>' +
+        '<v-divider></v-divider>' +
+        '</v-flex>' +
+        '</v-layout>',
+
     methods: {
         edit: function() {
             this.editMethod(this.message);
@@ -86,18 +102,12 @@ Vue.component('messages-list', {
         }
     },
     template:
-        '<div style="position: relative; width: 300px;">' +
-        '<message-form :messages="messages" :messageAttr="message" />' +
-        '<message-row v-for="message in messages" :key="message.id" :message="message" ' +
-        ':editMethod="editMethod" :messages="messages" />' +
-        '</div>',
-    created: function() {
-        messageApi.get().then(result =>
-            result.json().then(data =>
-                data.forEach(message => this.messages.push(message))
-            )
-        )
-    },
+        '<v-layout align-space-around justify-start column>' +
+            '<message-form :messages="messages" :messageAttr="message" />' +
+            '<message-row v-for="message in messages" :key="message.id" :message="message" ' +
+            ':editMethod="editMethod" :messages="messages" />' +
+        '</v-layout>',
+
     methods: {
         editMethod: function(message) {
             this.message = message;
@@ -105,9 +115,26 @@ Vue.component('messages-list', {
     }
 });
 
+
 var app = new Vue({
     el: '#app',
-    template: '<messages-list :messages="messages" />',
+    template: '<v-app dark>' +
+        '<v-toolbar color="#283593" dense fixed  app> <span white--text>TodoList</span></v-toolbar>' +
+        '<v-content>' +
+            '<v-container>' +
+                    '<messages-list :messages="messages" />' +
+            '</v-container>' +
+        '</v-content>' +
+        '</v-app>',
+
+    created: function() {
+        messageApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(message => this.messages.push(message))
+            )
+        )
+    },
+
     data: {
         messages: []
     }
